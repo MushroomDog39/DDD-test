@@ -79,3 +79,39 @@ body { background-color: #1a1a1a; font-family: "Microsoft JhengHei", sans-serif;
     width: 100%;
     font-size: 0.9rem;
 }
+
+#debug-panel {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    background: rgba(0, 0, 0, 0.8);
+    color: #00ff00; /* 駭客綠，方便辨識 */
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 12px;
+    z-index: 1000;
+    pointer-events: none; /* 不會擋到點擊 */
+}
+
+/* 定義進入動畫 */
+@keyframes fadeInSlide {
+    from {
+        opacity: 0;
+        transform: translateY(20px); /* 從下方 20px 開始 */
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* 將動畫套用到卡牌內容容器 */
+.card-main-frame {
+    /* ...保留原本設定... */
+    animation: fadeInSlide 0.5s ease-out; /* 每次內容載入都會執行 */
+}
+
+/* 強制重新觸發動畫的類別 */
+.animate-trigger {
+    animation: none !important;
+}

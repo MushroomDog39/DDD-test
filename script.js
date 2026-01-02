@@ -78,12 +78,23 @@ const quizData = [
     
 ];
 
+// ...保留之前的 scores, quizData 等設定...
+
 function loadQuestion() {
     const qData = quizData[currentStep];
-    document.getElementById("question-text").innerText = qData.q;
-    const container = document.getElementById("options-container");
-    container.innerHTML = ""; // 清空舊選項
+    const frame = document.querySelector(".card-main-frame");
+    
+    // 1. 觸發重新動畫 (先移除類別再重新加入)
+    frame.style.animation = 'none';
+    frame.offsetHeight; /* 觸發重繪 (Reflow) */
+    frame.style.animation = null; 
 
+    // 2. 更新題目文字
+    document.getElementById("question-text").innerText = qData.q;
+    
+    // 3. 更新選項
+    const container = document.getElementById("options-container");
+    container.innerHTML = "";
     qData.options.forEach(opt => {
         const btn = document.createElement("button");
         btn.className = "option-btn";
@@ -92,10 +103,18 @@ function loadQuestion() {
         container.appendChild(btn);
     });
 
-    // 第一題隱藏上一題按鈕
+    // 4. 更新測試版分數顯示
+    updateDebugScore();
+
     document.getElementById("back-btn").style.visibility = currentStep === 0 ? "hidden" : "visible";
 }
 
+function updateDebugScore() {
+    const display = document.getElementById("score-display");
+    display.innerText = `P:${scores.P} | D:${scores.D} | W:${scores.W} | L:${scores.L} | R:${scores.R} | O:${scores.O}`;
+}
+
+// 修改 selectOption 也要記得更新分數
 function selectOption(type, weight) {
     scores[type] += weight;
     history.push({ type, weight });
@@ -105,15 +124,6 @@ function selectOption(type, weight) {
         loadQuestion();
     } else {
         showResult();
-    }
-}
-
-function previousQuestion() {
-    if (currentStep > 0) {
-        const last = history.pop();
-        scores[last.type] -= last.weight; // 扣回分數
-        currentStep--;
-        loadQuestion();
     }
 }
 

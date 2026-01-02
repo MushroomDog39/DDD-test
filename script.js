@@ -22,57 +22,57 @@ const quizData = [
     {
         q: "進入地牢深處，發現兩條岔路時...",
         options: [
-            { text: "花時間觀察地圖紋路與風向，推敲出最正確的路徑。", type: "L", weight: 2 },
-            { text: "先兩邊都快速跑跑看，感受哪邊比較有驚喜。", type: "W", weight: 3 }
+            { text: "花時間觀察地圖紋路與風向，推敲出最正確的路徑。", type: "W", weight: 2, type: "P", weight: 1 },
+            { text: "先兩邊都快速跑跑看，感受哪邊比較有驚喜。", type: "D", weight: 2 }
         ]
     },
     {
         q: "當你的疲勞值漸漸升高，身體感到沈重時...",
         options: [
-            { text: "堅持繼續戰鬥，想要在倒下前多掃蕩一隻怪。", type: "L", weight: 2 },
-            { text: "決定找個隱密的角落坐下來，開始想像成功後的慶功宴。", type: "W", weight: 3 }
+            { text: "堅持繼續戰鬥，想要在倒下前多掃蕩一隻怪。", type: "O", weight: 3 },
+            { text: "決定找個隱密的角落坐下來，開始想像成功後的慶功宴。", type: "D", weight: 3 }
         ]
     },
     {
         q: "隊友突然丟給你一張雜事卡（如：修補盔甲）時...",
         options: [
-            { text: "雖然無奈但還是接過來，並要求自己修得比原來的更好。", type: "L", weight: 2 },
-            { text: "找機會把這件事推給看起來比較閒的人。", type: "W", weight: 3 }
+            { text: "雖然無奈但還是接過來，並要求自己修得比原來的更好。", type: "P", weight: 3, type: "O", weight: 1 },
+            { text: "找機會把這件事推給看起來比較閒的人。", type: "R", weight: 3 }
         ]
     },
     {
         q: "面對強大的 BOSS 怪，你的戰鬥策略是？",
         options: [
-            { text: "前期保留體力，等到最後一刻爆發全力一擊。", type: "L", weight: 2 },
-            { text: "同一回合內使出所有連續技，務求短時間內造成最大傷害。", type: "W", weight: 3 }
+            { text: "前期保留體力，等到最後一刻爆發全力一擊。", type: "L", weight: 3 },
+            { text: "同一回合內使出所有連續技，務求短時間內造成最大傷害。", type: "O", weight: 3 }
         ]
     },
     {
         q: "當戰鬥成果不如預期，裝備沾上汙垢時...",
         options: [
-            { text: "感到極度沮喪，甚至想把這次冒險紀錄擦掉重來。", type: "L", weight: 2 },
-            { text: "沒關係，這也是一種「戰鬥的姿態」，下次會更好。", type: "W", weight: 3 }
+            { text: "感到極度沮喪，甚至想把這次冒險紀錄擦掉重來。", type: "P", weight: 3 },
+            { text: "沒關係，這也是一種「戰鬥的姿態」，下次會更好。", type: "D", weight: 2 }
         ]
     },
     {
         q: "在休息營地放空時，你的腦袋在想什麼？",
         options: [
-            { text: "剛才戰鬥中漏掉的小失誤，反省如何做到完美。", type: "L", weight: 2 },
-            { text: "各種新奇的魔法組合，雖然還沒試過但感覺很強。", type: "W", weight: 3 }
+            { text: "剛才戰鬥中漏掉的小失誤，反省如何做到完美。", type: "P", weight: 2, type: "W", weight: 1 },
+            { text: "各種新奇的魔法組合，雖然還沒試過但感覺很強。", type: "D", weight: 3 }
         ]
     },
     {
         q: "公會規定每位冒險者都要寫戰鬥日誌...",
         options: [
-            { text: "每天雖然痛苦但還是強撐著寫完，甚至寫到過勞。", type: "L", weight: 2 },
-            { text: "覺得這規定太束縛，能拖就拖，直到最後一刻才補完。", type: "W", weight: 3 }
+            { text: "每天雖然痛苦但還是強撐著寫完，甚至寫到過勞。", type: "O", weight: 3 },
+            { text: "覺得這規定太束縛，能拖就拖，直到最後一刻才補完。", type: "R", weight: 2, type: "L", weight: 1 }
         ]
     },
     {
         q: "冒險結束，結算積分時...",
         options: [
-            { text: "即使累壞了，還是會想著如果當時再多觀察一下就好了。", type: "L", weight: 2 },
-            { text: "只要有拿到賞金就好，現在只想徹底放鬆不想任何計畫。", type: "W", weight: 3 }
+            { text: "即使累壞了，還是會想著如果當時再多觀察一下就好了。", type: "W", weight: 3, type: "P", weight: 1 },
+            { text: "只要有拿到賞金就好，現在只想徹底放鬆不想任何計畫。", type: "L", weight: 2 }
         ]
     }
     

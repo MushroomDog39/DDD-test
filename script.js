@@ -3,6 +3,20 @@ let scores = { P: 0, D: 0, W: 0, L: 0, R: 0, O: 0 };
 let currentStep = 0;
 let history = []; // 儲存每一題加分的物件，用於上一題扣回
 
+/* 全域變數擴充 */
+let currentSlideIndex = 0;
+let touchStartX = 0;
+let touchEndX = 0;
+
+const personalityList = [
+    { code: 'P', name: '完美主義者', desc: '追求絕對的無瑕讓你難以邁出第一步。請試著接受「完成優於完美」，即使裝備有些許刮痕，也依然能完成一場精彩的冒險。' },
+    { code: 'D', name: '夢想家', desc: '腦中充滿了美妙的冒險藍圖，卻常在幻想中流連忘返。請嘗試將宏大的計畫拆解成小步標，現在就踏出營地，實踐你的奇思妙想吧！' },
+    { code: 'W', name: '杞人憂天者', desc: '因為過多的擔憂與過度的準備，讓你常常在路口止步不前。冒險本就充滿未知，試著放手去做，你會發現自己比想像中更強大。' },
+    { code: 'L', name: '臨陣磨槍者', desc: '習慣在死線逼近、腎上腺素飆升時才爆發戰力。雖然衝刺的快感很迷人，但規律的節奏能讓你走得更遠，且不至於在戰鬥後徹底癱瘓。' },
+    { code: 'R', name: '叛逆者', desc: '不喜歡被公會的任務規章所束縛，拖延是你表達自我的方式。試著尋找冒險中真正令你感興趣的意義，讓動力從心出發而非為了對抗。' },
+    { code: 'O', name: '過勞者', desc: '過度的努力讓你雖然戰果豐碩，但也早已身心俱疲。請記得「休息」也是冒險的一部分，學會適時放下重擔，你才能在地牢深處走得更久。' }
+];
+
 // 2. 題目資料 (包含您提到的多重加權設定)
 const quizData = [
     {
@@ -84,8 +98,12 @@ function renderStartScreen() {
     const frame = document.querySelector(".card-main-frame");
     frame.classList.remove('layout-slider');
     frame.innerHTML = `
-        <div class="top-group" style="margin-top: 25%;">
-             <h1 style="color: #c9a063; font-size: 2rem; text-align: center; line-height: 1.5; text-shadow: 2px 2px 4px rgba(0,0,0,0.8);">Delay or Deliver Dungeon<br>拖延地牢<br><span style="font-size: 1.2rem; color: #fff;">人格測驗</span></h1>
+        <div class="top-group" style="margin-top: 10%;">
+             <!-- LOGO 與標題容器 -->
+             <div style="display: flex; flex-direction: column; align-items: center; width: 100%;">
+                 <img src="img/LOGO.png" alt="Delay or Deliver Dungeon Logo" style="max-width: 100%; max-height: 35vh; width: auto; object-fit: contain; filter: drop-shadow(0 0 20px rgba(255, 255, 255, 0.6));">
+                 <p style="color: #000; font-size: 1.8rem; margin-top: -5px; letter-spacing: 4px; font-weight: bold; max-width: 100%; max-height: 35vh;">人格測驗</p>
+             </div>
         </div>
         <div class="middle-group">
             <!-- 這裡未來可以放裝飾圖 -->
@@ -151,7 +169,7 @@ function loadQuestion() {
         btn.className = "option-btn";
         btn.innerText = opt.text;
         
-        // 點擊時傳送該選項的 scores 物件 (例如 {W:2, P:1})
+        // 點擊時傳送該選項的 scores 物件 (例如 {W:2, P:1})，統一延遲 100ms
         btn.onclick = () => {
             setTimeout(() => selectOption(opt.scores), 100);
         };
@@ -226,10 +244,10 @@ function updateDebugScore() {
  */
 function showResult() {
     const resultKey = Object.keys(scores).reduce((a, b) => scores[a] > scores[b] ? a : b);
-    const personalityNames = {
-        P: "完美主義者", D: "夢想家", W: "杞人憂天者", L: "臨陣磨槍者", R: "叛逆者", O: "過勞者"
-    };
-
+    
+    // 從 personalityList 中查找結果數據
+    const resultData = personalityList.find(p => p.code === resultKey);
+    
     const finalFrame = document.querySelector(".card-main-frame");
     finalFrame.classList.remove('layout-slider');
     finalFrame.innerHTML = `
@@ -237,9 +255,11 @@ function showResult() {
             <h2 style="color: #fff; font-size: 1.2rem;">測驗結果</h2>
         </div>
         <div class="middle-group" style="align-items: center; justify-content: center;">
-            <img src="img/${resultKey}.png" alt="${personalityNames[resultKey]}" style="max-width: 90%; height: 75%; object-fit: contain; filter: drop-shadow(0 0 10px rgba(0,0,0,0.5));">
-            <h1 style="color: #c9a063; font-size: clamp(1.4rem, 6vw, 1.8rem); margin: 5px 0;">${personalityNames[resultKey]}</h1>
-            <p style="color: #ddd; font-size: clamp(0.8rem, 3.5vw, 0.95rem);">你是地下城中的${personalityNames[resultKey]}！</p>
+            <img src="img/${resultKey}.png" alt="${resultData.name}" style="max-width: 90%; height: 55%; object-fit: contain; filter: drop-shadow(0 0 10px rgba(0,0,0,0.5));">
+            <h1 style="color: #c9a063; font-size: clamp(1.4rem, 6vw, 1.8rem); margin: 5px 0;">${resultData.name}</h1>
+            <div class="result-desc-box">
+                <p style="color: #ddd; font-size: clamp(0.8rem, 3.2vw, 0.9rem); text-align: justify; line-height: 1.5;">你是地下城中的${resultData.name}，${resultData.desc}</p>
+            </div>
         </div>
         <div class="bottom-group">
             <button class="option-btn" onclick="setTimeout(showAllPersonalities, 100)">其他拖延人格介紹</button>
@@ -250,20 +270,6 @@ function showResult() {
     const debugPanel = document.getElementById("debug-panel");
     if (debugPanel) debugPanel.style.display = "none";
 }
-
-/* 全域變數擴充 */
-let currentSlideIndex = 0;
-let touchStartX = 0;
-let touchEndX = 0;
-
-const personalityList = [
-    { code: 'P', name: '完美主義者', desc: '對細節極度執著，總覺得還沒準備好。' },
-    { code: 'D', name: '夢想家', desc: '想法很多，但總是在腦海中模擬，缺乏實際行動。' },
-    { code: 'W', name: '杞人憂天者', desc: '總是擔心最壞的情況發生，導致不敢邁出一步。' },
-    { code: 'L', name: '臨陣磨槍者', desc: '不到最後一刻絕不行動，享受壓線的快感。' },
-    { code: 'R', name: '叛逆者', desc: '越是被要求就越不想做，用拖延來對抗控制。' },
-    { code: 'O', name: '過勞者', desc: '承擔了過多責任，精疲力盡導致效率低落。' }
-];
 
 /**
  * 顯示所有拖延人格介紹 (Task 3)
@@ -304,8 +310,7 @@ function renderSlide() {
             <h2 style="color: #c9a063; font-size: 1.2rem; text-shadow: 1px 1px 2px black;">人格圖鑑 (${currentSlideIndex + 1}/${personalityList.length})</h2>
         </div>
         
-        <div class="middle-group" style="display: flex; flex-direction: column; align-items: center; justify-content: flex-start; position: relative; height: 100%; padding-top: 10px;">
-            
+        <div class="middle-group">
             <!-- 左右切換按鈕 -->
             <button onclick="setTimeout(() => changeSlide(-1), 100)" class="slider-nav-btn prev">&lt;</button>
             <button onclick="setTimeout(() => changeSlide(1), 100)" class="slider-nav-btn next">&gt;</button>

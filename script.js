@@ -97,7 +97,7 @@ function renderStartScreen() {
     scores = { P: 0, D: 0, W: 0, L: 0, R: 0, O: 0 };
     const debugPanel = document.getElementById("debug-panel");
     if (debugPanel) {
-        debugPanel.style.display = "block"; // 確保顯示
+        debugPanel.style.display = "none"; // 確保顯示
         updateDebugScore();
     }
 }

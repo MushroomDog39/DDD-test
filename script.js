@@ -237,15 +237,15 @@ function showResult() {
     const finalFrame = document.querySelector(".card-main-frame");
     finalFrame.innerHTML = `
         <div class="top-group">
-            <h2 style="color: #fff;">測驗結果</h2>
+            <h2 style="color: #fff; font-size: 1.2rem;">測驗結果</h2>
         </div>
-        <div class="middle-group" style="text-align: center; overflow-y: auto; max-height: 60%;">
-            <img src="img/${resultKey}.png" alt="${personalityNames[resultKey]}" style="max-width: 80%; height: auto; margin-bottom: 10px; border-radius: 10px;">
-            <h1 style="color: #c9a063; font-size: 1.8rem; margin-bottom: 5px;">${personalityNames[resultKey]}</h1>
-            <p style="color: #ddd; font-size: 0.9rem;">你是地下城中的${personalityNames[resultKey]}！</p>
+        <div class="middle-group" style="text-align: center; flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+            <img src="img/${resultKey}.png" alt="${personalityNames[resultKey]}" style="max-width: 70%; max-height: 45vh; height: auto; margin-bottom: 5px; border-radius: 10px; filter: drop-shadow(0 0 10px rgba(0,0,0,0.5));">
+            <h1 style="color: #c9a063; font-size: clamp(1.4rem, 6vw, 1.8rem); margin: 5px 0;">${personalityNames[resultKey]}</h1>
+            <p style="color: #ddd; font-size: clamp(0.8rem, 3.5vw, 0.95rem); margin-bottom: 10px;">你是地下城中的${personalityNames[resultKey]}！</p>
         </div>
         <div class="bottom-group">
-            <button class="option-btn" onclick="showAllPersonalities()" style="margin-bottom: 10px;">其他拖延人格介紹</button>
+            <button class="option-btn" onclick="showAllPersonalities()" style="margin-bottom: 8px;">其他拖延人格介紹</button>
             <button class="option-btn" onclick="renderStartScreen()">重新挑戰</button>
         </div>
     `;

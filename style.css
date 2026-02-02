@@ -1,6 +1,6 @@
 /* 基礎設定 */
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-body { background-color: #393939; font-family: "Microsoft JhengHei", sans-serif; overflow: hidden; }
+body { background-color: #393939; font-family: "Microsoft JhengHei", sans-serif; overflow-y: auto; overflow-x: hidden; }
 
 .page-wrapper {
     display: flex;
@@ -24,8 +24,10 @@ body { background-color: #393939; font-family: "Microsoft JhengHei", sans-serif;
     .card-container {
         width: 100vw;
         height: auto;
+        min-height: 100vh;
         max-height: none;
         padding: 0;
+        padding-bottom: 80px; /* 增加底部安全距離 */
     }
 }
 

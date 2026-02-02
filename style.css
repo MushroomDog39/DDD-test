@@ -1,6 +1,6 @@
 /* 基礎設定 */
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body { background-color: #1a1a1a; font-family: "Microsoft JhengHei", sans-serif; }
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+body { background-color: #1a1a1a; font-family: "Microsoft JhengHei", sans-serif; overflow: hidden; }
 
 .page-wrapper {
     display: flex;
@@ -11,63 +11,108 @@ body { background-color: #1a1a1a; font-family: "Microsoft JhengHei", sans-serif;
 
 /* 1:2 卡牌容器 */
 .card-container {
-    height: 100vh; /* 強制垂直滿版 */
-    width: auto;   /* 寬度隨比例連動 */
+    height: 100vh; 
+    width: auto;   
     aspect-ratio: 1 / 2;
     position: relative;
     box-shadow: 0 10px 30px rgba(0,0,0,0.5);
     background: #706d6d;
-    margin: 0 auto; /* 確保水平置中 */
+    margin: 0 auto;
 }
 
-/* 響應式：直式螢幕左右滿版 */
 @media (max-aspect-ratio: 1/2) {
     .card-container {
-        width: 100vw;  /* 當螢幕比 1:2 還窄時，以寬度為準 */
+        width: 100vw;
         height: auto;
         max-height: none;
         padding: 0;
     }
 }
 
-/* 卡牌內容與外框 */
+/* 卡牌內容與外框 (通用設定) */
 .card-main-frame {
     width: 100%;
     height: 100%;
-    background-image: url('bg_card.png'); /* 請確保圖片在同資料夾 */
+    background-image: url('bg_card.png'); 
     background-size: 100% 100%;
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
-    /* 響應式內距：確保至少 20px 緩衝，並隨螢幕變大 */
-    padding: clamp(30px, 12%, 60px) clamp(20px, 10%, 50px) clamp(20px, 8%, 40px) clamp(20px, 10%, 50px);
+    justify-content: space-between; /* 預設為分散對齊，適合首頁與測驗頁 */
+    /* 增加底部 Padding，讓按鈕不會貼底 */
+    padding: clamp(30px, 12%, 60px) clamp(20px, 10%, 50px) clamp(40px, 12%, 60px) clamp(20px, 10%, 50px);
+    overflow: hidden; 
+}
+
+/* 通用區塊設定 (預設彈性) */
+.top-group {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 1 auto; /* 自然高度 */
+}
+
+.middle-group {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    flex: 1; /* 佔據剩餘空間 */
+    justify-content: center;
+    position: relative;
+    overflow: visible; /* 預設不隱藏溢出，以免切到陰影 */
+}
+
+.bottom-group {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    flex: 0 1 auto; /* 自然高度 */
+}
+
+/* --- Slider 專用佈局模式 (嚴格鎖定) --- */
+.card-main-frame.layout-slider {
+    justify-content: flex-start; /* 改為靠上，由內部比例控制 */
+}
+
+.card-main-frame.layout-slider .top-group {
+    flex: 0 0 15%;
+    overflow: hidden;
+}
+
+.card-main-frame.layout-slider .middle-group {
+    flex: 0 0 62%;
+    justify-content: flex-start;
+    overflow: hidden; /* Slider 頁面必須隱藏溢出以防跑版 */
+}
+
+.card-main-frame.layout-slider .bottom-group {
+    flex: 0 0 23%;
+    justify-content: center;
+    overflow: hidden;
 }
 
 /* 題目文字樣式 */
 #question-text {
-    color: #f0e6d2; /* 淺米色 */
+    color: #f0e6d2;
     text-align: center;
-    /* 使用 clamp 讓字體在窄螢幕自動縮小 */
     font-size: clamp(1rem, 4.5vw, 1.4rem);
     line-height: 1.5;
     font-weight: 700;
     letter-spacing: 1px;
     text-shadow: 2px 2px 4px rgba(0,0,0,0.9);
-    margin-bottom: 2vh; /* 改用 vh 替代固定 px */
 }
 
 /* 選項按鈕樣式 (立體卡牌風格) */
 .option-btn {
     display: block;
     width: 100%;
-    /* 更加緊湊的按鈕尺寸 */
     padding: clamp(8px, 2.5vw, 12px);
-    margin-bottom: clamp(8px, 3vw, 15px);
+    margin-bottom: clamp(6px, 2vh, 12px);
     background: linear-gradient(145deg, #2b2b2b, #1f1f1f);
     border: 2px solid #c9a063;
     box-shadow: inset 0 0 10px rgba(0,0,0,0.8), 0 4px 6px rgba(0,0,0,0.5);
     color: #e0e0e0;
-    /* 字體大小微調 */
     font-size: clamp(0.85rem, 3vw, 1rem);
     font-weight: bold;
     cursor: pointer;
@@ -79,115 +124,86 @@ body { background-color: #1a1a1a; font-family: "Microsoft JhengHei", sans-serif;
 .option-btn:hover {
     background: linear-gradient(145deg, #c9a063, #a08040);
     color: #1a1a1a;
-    box-shadow: inset 0 0 5px rgba(0,0,0,0.5), 0 6px 8px rgba(0,0,0,0.6);
-    transform: translateY(-2px);
 }
 
 .option-btn:active {
-    transform: translateY(1px);
-    box-shadow: inset 0 3px 5px rgba(0,0,0,0.6);
+    transform: scale(0.96); /* 按下縮放效果 */
+    filter: brightness(1.1); /* 稍微變亮 */
+    box-shadow: inset 0 2px 5px rgba(0,0,0,0.8);
 }
 
-/* 上一題按鈕 (實體化) */
 #back-btn {
     background: #3e3b3b;
     border: 1px solid #c9a063;
     color: #c9a063;
-    text-decoration: none;
     cursor: pointer;
-    width: auto;
-    min-width: 120px;
-    padding: 8px 16px;
-    font-size: 0.9rem;
+    min-width: 100px;
+    padding: 6px 12px;
+    font-size: 0.85rem;
     margin: 0 auto;
     display: block;
     border-radius: 4px;
-    transition: all 0.1s;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.5);
-}
-
-#back-btn:hover {
-    background: #504d4d;
-    color: #fff;
+    transition: transform 0.1s;
 }
 
 #back-btn:active {
-    transform: translateY(1px);
-    box-shadow: none;
+    transform: scale(0.95);
 }
 
 #debug-panel {
     position: fixed;
-    top: 10px;
-    right: 10px;
+    top: 5px; right: 5px;
     background: rgba(0, 0, 0, 0.8);
-    color: #00ff00; /* 駭客綠，方便辨識 */
-    padding: 10px;
-    border-radius: 5px;
-    font-size: 12px;
+    color: #00ff00;
+    padding: 5px;
+    font-size: 10px;
     z-index: 1000;
-    pointer-events: none; /* 不會擋到點擊 */
+    pointer-events: none;
+    display: none; /* 隱藏測試面板 */
 }
 
-/* 定義進入動畫 */
+/* 定義動畫 */
 @keyframes fadeInSlide {
-    from {
-        opacity: 0;
-        transform: translateY(20px); /* 從下方 20px 開始 */
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
 }
+.card-main-frame { animation: fadeInSlide 0.5s ease-out; }
 
-/* 將動畫套用到卡牌內容容器 */
-.card-main-frame {
-    /* ...保留原本設定... */
-    animation: fadeInSlide 0.5s ease-out; /* 每次內容載入都會執行 */
-}
-
-/* 強制重新觸發動畫的類別 */
-.animate-trigger {
-    animation: none !important;
-}
-
-/* Slider 樣式擴充 */
+/* Slider 樣式 (配合 layout-slider 使用) */
 .slider-nav-btn {
     position: absolute;
-    top: 45%; /* 配合新的圖片高度調整 */
+    top: 35%; 
     transform: translateY(-50%);
     background: none;
     border: none;
     color: #c9a063;
-    font-size: 3rem;
+    font-size: 2.5rem;
     cursor: pointer;
-    z-index: 10;
+    z-index: 20; /* 提高層級 */
     text-shadow: 0 0 5px #000;
-    opacity: 0.8;
-    transition: opacity 0.2s;
+    transition: transform 0.1s, opacity 0.2s;
 }
-.slider-nav-btn:hover { opacity: 1; }
-.slider-nav-btn.prev { left: -15px; }
-.slider-nav-btn.next { right: -15px; }
+.slider-nav-btn:active {
+    transform: translateY(-50%) scale(0.85); /* 按下縮小 */
+    opacity: 0.6;
+}
+/* 內縮按鈕，避免被 Padding 或 Overflow 切到 */
+.slider-nav-btn.prev { left: 0; }
+.slider-nav-btn.next { right: 0; }
 
-/* 新增：圖片固定容器，防止跳動 */
 .slider-img-container {
     width: 100%;
-    /* 重新分配比例：圖片區擴大 */
-    flex: 0 0 66%; 
+    /* 這裡可以維持 flex-basis，因為外層 .middle-group 已經被鎖定了 */
+    flex: 0 0 62%; 
     display: flex;
     justify-content: center;
-    align-items: flex-end; 
-    margin-bottom: 0;
-    overflow: hidden; 
+    align-items: flex-end;
+    overflow: hidden;
 }
-
 .slider-img {
-    max-width: 100%; 
-    height: 100%; /* 強制高度填滿容器 */
-    width: auto;  /* 寬度隨比例，但受限於 max-width */
-    object-fit: contain; 
+    max-width: 100%;
+    height: 100%;
+    object-fit: contain;
     filter: drop-shadow(0 0 10px rgba(0,0,0,0.5));
 }
 
@@ -195,66 +211,37 @@ body { background-color: #1a1a1a; font-family: "Microsoft JhengHei", sans-serif;
     background: rgba(20, 20, 20, 0.85);
     border: 2px solid #806030;
     border-radius: 8px;
-    padding: clamp(8px, 2.5vw, 12px);
+    padding: 10px;
     width: 100%;
-    box-shadow: inset 0 0 15px rgba(0,0,0,0.8), 0 0 5px rgba(201, 160, 99, 0.3);
+    box-shadow: inset 0 0 15px rgba(0,0,0,0.8);
     position: relative;
-    
-    /* 核心修正：高度減少約 1/3 (從 40% 降至 26%) */
-    flex: 0 0 26%; 
-    margin-top: clamp(8px, 1.5vh, 12px); 
-    
+    flex: 0 0 33%; 
+    margin-top: 5%; 
     display: flex;
     flex-direction: column;
-    justify-content: flex-start; 
-    overflow-y: auto; 
-}
-
-/* 金色內邊框效果 */
-.desc-box::before {
-    content: "";
-    position: absolute;
-    top: 4px; left: 4px; right: 4px; bottom: 4px;
-    border: 1px solid #c9a063;
-    border-radius: 4px;
-    opacity: 0.5;
-    pointer-events: none;
+    overflow-y: auto;
 }
 
 .desc-title {
     color: #c9a063;
-    margin-bottom: 8px;
-    /* 響應式標題大小 */
-    font-size: clamp(1.2rem, 5vw, 1.5rem);
-    text-shadow: 1px 1px 0 #000;
-    flex-shrink: 0; /* 標題不壓縮 */
+    font-size: clamp(1.1rem, 4.5vw, 1.3rem);
+    margin-bottom: 5px;
 }
-
 .desc-text {
     color: #ddd;
-    /* 響應式內文大小 */
-    font-size: clamp(0.85rem, 3.5vw, 1rem);
-    line-height: 1.5;
+    font-size: clamp(0.8rem, 3.5vw, 0.95rem);
+    line-height: 1.4;
     text-align: justify;
 }
 
-/* Slider 切換動畫 */
 @keyframes sliderEntry {
-    from {
-        opacity: 0;
-        transform: translateX(10px);
-    }
-    to {
-        opacity: 1;
-        transform: translateX(0);
-    }
+    from { opacity: 0; transform: translateX(5px); }
+    to { opacity: 1; transform: translateX(0); }
 }
-
 .slider-anim {
     animation: sliderEntry 0.3s ease-out;
     width: 100%;
     height: 100%;
     display: flex;
     flex-direction: column;
-    align-items: center;
 }

@@ -82,22 +82,23 @@ const quizData = [
  */
 function renderStartScreen() {
     const frame = document.querySelector(".card-main-frame");
+    frame.classList.remove('layout-slider');
     frame.innerHTML = `
-        <div class="top-group" style="margin-top: 30%;">
+        <div class="top-group" style="margin-top: 25%;">
              <h1 style="color: #c9a063; font-size: 2rem; text-align: center; line-height: 1.5; text-shadow: 2px 2px 4px rgba(0,0,0,0.8);">Delay or Deliver Dungeon<br>拖延地牢<br><span style="font-size: 1.2rem; color: #fff;">人格測驗</span></h1>
         </div>
         <div class="middle-group">
             <!-- 這裡未來可以放裝飾圖 -->
         </div>
         <div class="bottom-group">
-            <button class="option-btn" onclick="startQuiz()">開始挑戰</button>
+            <button class="option-btn" onclick="setTimeout(startQuiz, 100)">開始挑戰</button>
         </div>
     `;
     // 確保 debug 面板重置
     scores = { P: 0, D: 0, W: 0, L: 0, R: 0, O: 0 };
     const debugPanel = document.getElementById("debug-panel");
     if (debugPanel) {
-        debugPanel.style.display = "none"; // 確保顯示
+        debugPanel.style.display = "none"; // 強制隱藏
         updateDebugScore();
     }
 }
@@ -107,6 +108,7 @@ function renderStartScreen() {
  */
 function startQuiz() {
     const frame = document.querySelector(".card-main-frame");
+    frame.classList.remove('layout-slider');
     // 重建測驗 DOM 結構
     frame.innerHTML = `
           <div class="top-group">
@@ -114,7 +116,7 @@ function startQuiz() {
           </div>
           <div class="middle-group" id="options-container"> </div>
           <div class="bottom-group">
-            <button id="back-btn" onclick="previousQuestion()">上一題</button>
+            <button id="back-btn" onclick="setTimeout(previousQuestion, 100)">上一題</button>
           </div>
     `;
     
@@ -150,7 +152,9 @@ function loadQuestion() {
         btn.innerText = opt.text;
         
         // 點擊時傳送該選項的 scores 物件 (例如 {W:2, P:1})
-        btn.onclick = () => selectOption(opt.scores);
+        btn.onclick = () => {
+            setTimeout(() => selectOption(opt.scores), 100);
+        };
         container.appendChild(btn);
     });
 
@@ -221,42 +225,37 @@ function updateDebugScore() {
  * 顯示最終結果
  */
 function showResult() {
-    // 找出最高分的 key
     const resultKey = Object.keys(scores).reduce((a, b) => scores[a] > scores[b] ? a : b);
-    
     const personalityNames = {
-        P: "完美主義者",
-        D: "夢想家",
-        W: "杞人憂天者",
-        L: "臨陣磨槍者",
-        R: "叛逆者",
-        O: "過勞者"
+        P: "完美主義者", D: "夢想家", W: "杞人憂天者", L: "臨陣磨槍者", R: "叛逆者", O: "過勞者"
     };
 
-    // 這裡可以根據 resultKey 載入對應的立繪
     const finalFrame = document.querySelector(".card-main-frame");
+    finalFrame.classList.remove('layout-slider');
     finalFrame.innerHTML = `
         <div class="top-group">
             <h2 style="color: #fff; font-size: 1.2rem;">測驗結果</h2>
         </div>
-        <div class="middle-group" style="text-align: center; flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center;">
-            <img src="img/${resultKey}.png" alt="${personalityNames[resultKey]}" style="max-width: 70%; max-height: 45vh; height: auto; margin-bottom: 5px; border-radius: 10px; filter: drop-shadow(0 0 10px rgba(0,0,0,0.5));">
+        <div class="middle-group" style="align-items: center; justify-content: center;">
+            <img src="img/${resultKey}.png" alt="${personalityNames[resultKey]}" style="max-width: 90%; height: 75%; object-fit: contain; filter: drop-shadow(0 0 10px rgba(0,0,0,0.5));">
             <h1 style="color: #c9a063; font-size: clamp(1.4rem, 6vw, 1.8rem); margin: 5px 0;">${personalityNames[resultKey]}</h1>
-            <p style="color: #ddd; font-size: clamp(0.8rem, 3.5vw, 0.95rem); margin-bottom: 10px;">你是地下城中的${personalityNames[resultKey]}！</p>
+            <p style="color: #ddd; font-size: clamp(0.8rem, 3.5vw, 0.95rem);">你是地下城中的${personalityNames[resultKey]}！</p>
         </div>
         <div class="bottom-group">
-            <button class="option-btn" onclick="showAllPersonalities()" style="margin-bottom: 8px;">其他拖延人格介紹</button>
-            <button class="option-btn" onclick="renderStartScreen()">重新挑戰</button>
+            <button class="option-btn" onclick="setTimeout(showAllPersonalities, 100)">其他拖延人格介紹</button>
+            <button class="option-btn" onclick="setTimeout(renderStartScreen, 100)">重新挑戰</button>
         </div>
     `;
     
-    // 結果頁隱藏 debug 面板
     const debugPanel = document.getElementById("debug-panel");
     if (debugPanel) debugPanel.style.display = "none";
 }
 
 /* 全域變數擴充 */
 let currentSlideIndex = 0;
+let touchStartX = 0;
+let touchEndX = 0;
+
 const personalityList = [
     { code: 'P', name: '完美主義者', desc: '對細節極度執著，總覺得還沒準備好。' },
     { code: 'D', name: '夢想家', desc: '想法很多，但總是在腦海中模擬，缺乏實際行動。' },
@@ -275,11 +274,30 @@ function showAllPersonalities() {
 }
 
 /**
+ * 處理滑動手勢
+ */
+function handleGesture() {
+    const threshold = 50; // 最小滑動距離
+    const diff = touchStartX - touchEndX;
+
+    if (Math.abs(diff) > threshold) {
+        if (diff > 0) {
+            // 左滑 -> 下一張
+            changeSlide(1);
+        } else {
+            // 右滑 -> 上一張
+            changeSlide(-1);
+        }
+    }
+}
+
+/**
  * 渲染單一人格 Slide
  */
 function renderSlide() {
     const p = personalityList[currentSlideIndex];
     const frame = document.querySelector(".card-main-frame");
+    frame.classList.add('layout-slider');
     
     frame.innerHTML = `
         <div class="top-group">
@@ -289,8 +307,8 @@ function renderSlide() {
         <div class="middle-group" style="display: flex; flex-direction: column; align-items: center; justify-content: flex-start; position: relative; height: 100%; padding-top: 10px;">
             
             <!-- 左右切換按鈕 -->
-            <button onclick="changeSlide(-1)" class="slider-nav-btn prev">&lt;</button>
-            <button onclick="changeSlide(1)" class="slider-nav-btn next">&gt;</button>
+            <button onclick="setTimeout(() => changeSlide(-1), 100)" class="slider-nav-btn prev">&lt;</button>
+            <button onclick="setTimeout(() => changeSlide(1), 100)" class="slider-nav-btn next">&gt;</button>
 
             <!-- 內容區 (含動畫 wrapper) -->
             <div class="slider-anim">
@@ -308,10 +326,23 @@ function renderSlide() {
         </div>
 
         <div class="bottom-group">
-            <button class="option-btn" onclick="showResult()">返回結果</button>
-            <button class="option-btn" onclick="renderStartScreen()">回到首頁</button>
+            <button class="option-btn" onclick="setTimeout(showResult, 100)">返回結果</button>
+            <button class="option-btn" onclick="setTimeout(renderStartScreen, 100)">回到首頁</button>
         </div>
     `;
+
+    // 加入觸控監聽
+    const sliderArea = frame.querySelector('.middle-group');
+    if (sliderArea) {
+        sliderArea.addEventListener('touchstart', e => {
+            touchStartX = e.changedTouches[0].screenX;
+        }, {passive: true});
+
+        sliderArea.addEventListener('touchend', e => {
+            touchEndX = e.changedTouches[0].screenX;
+            handleGesture();
+        }, {passive: true});
+    }
 }
 
 /**

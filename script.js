@@ -78,6 +78,55 @@ const quizData = [
 ];
 
 /**
+ * 渲染開始畫面 (Task 1)
+ */
+function renderStartScreen() {
+    const frame = document.querySelector(".card-main-frame");
+    frame.innerHTML = `
+        <div class="top-group" style="margin-top: 30%;">
+             <h1 style="color: #c9a063; font-size: 2rem; text-align: center; line-height: 1.5; text-shadow: 2px 2px 4px rgba(0,0,0,0.8);">Delay or Deliver Dungeon<br>拖延地牢<br><span style="font-size: 1.2rem; color: #fff;">人格測驗</span></h1>
+        </div>
+        <div class="middle-group">
+            <!-- 這裡未來可以放裝飾圖 -->
+        </div>
+        <div class="bottom-group">
+            <button class="option-btn" onclick="startQuiz()">開始挑戰</button>
+        </div>
+    `;
+    // 確保 debug 面板重置
+    scores = { P: 0, D: 0, W: 0, L: 0, R: 0, O: 0 };
+    const debugPanel = document.getElementById("debug-panel");
+    if (debugPanel) {
+        debugPanel.style.display = "block"; // 確保顯示
+        updateDebugScore();
+    }
+}
+
+/**
+ * 初始化測驗結構並開始第一題
+ */
+function startQuiz() {
+    const frame = document.querySelector(".card-main-frame");
+    // 重建測驗 DOM 結構
+    frame.innerHTML = `
+          <div class="top-group">
+            <h2 id="question-text"></h2>
+          </div>
+          <div class="middle-group" id="options-container"> </div>
+          <div class="bottom-group">
+            <button id="back-btn" onclick="previousQuestion()">上一題</button>
+          </div>
+    `;
+    
+    // 重置狀態
+    currentStep = 0;
+    scores = { P: 0, D: 0, W: 0, L: 0, R: 0, O: 0 };
+    history = [];
+    
+    loadQuestion();
+}
+
+/**
  * 載入題目並觸發切換動畫
  */
 function loadQuestion() {
@@ -109,7 +158,10 @@ function loadQuestion() {
     updateDebugScore();
 
     // 控制上一題按鈕顯示邏輯
-    document.getElementById("back-btn").style.visibility = currentStep === 0 ? "hidden" : "visible";
+    const backBtn = document.getElementById("back-btn");
+    if(backBtn) {
+        backBtn.style.visibility = currentStep === 0 ? "hidden" : "visible";
+    }
 }
 
 /**
@@ -181,24 +233,103 @@ function showResult() {
         O: "過勞者"
     };
 
-    // 這裡可以根據 resultKey 載入對應的立繪 (之後美化再細做)
+    // 這裡可以根據 resultKey 載入對應的立繪
     const finalFrame = document.querySelector(".card-main-frame");
     finalFrame.innerHTML = `
         <div class="top-group">
             <h2 style="color: #fff;">測驗結果</h2>
         </div>
-        <div class="middle-group" style="text-align: center;">
-            <h1 style="color: #c9a063; font-size: 2.5rem; margin-bottom: 20px;">${personalityNames[resultKey]}</h1>
-            <p style="color: #ddd;">你是地下城中的${personalityNames[resultKey]}！</p>
+        <div class="middle-group" style="text-align: center; overflow-y: auto; max-height: 60%;">
+            <img src="img/${resultKey}.png" alt="${personalityNames[resultKey]}" style="max-width: 80%; height: auto; margin-bottom: 10px; border-radius: 10px;">
+            <h1 style="color: #c9a063; font-size: 1.8rem; margin-bottom: 5px;">${personalityNames[resultKey]}</h1>
+            <p style="color: #ddd; font-size: 0.9rem;">你是地下城中的${personalityNames[resultKey]}！</p>
         </div>
         <div class="bottom-group">
-            <button class="option-btn" onclick="location.reload()">重新挑戰</button>
+            <button class="option-btn" onclick="showAllPersonalities()" style="margin-bottom: 10px;">其他拖延人格介紹</button>
+            <button class="option-btn" onclick="renderStartScreen()">重新挑戰</button>
         </div>
     `;
     
     // 結果頁隱藏 debug 面板
-    document.getElementById("debug-panel").style.display = "none";
+    const debugPanel = document.getElementById("debug-panel");
+    if (debugPanel) debugPanel.style.display = "none";
 }
 
-// 啟動測驗
-loadQuestion();
+/* 全域變數擴充 */
+let currentSlideIndex = 0;
+const personalityList = [
+    { code: 'P', name: '完美主義者', desc: '對細節極度執著，總覺得還沒準備好。' },
+    { code: 'D', name: '夢想家', desc: '想法很多，但總是在腦海中模擬，缺乏實際行動。' },
+    { code: 'W', name: '杞人憂天者', desc: '總是擔心最壞的情況發生，導致不敢邁出一步。' },
+    { code: 'L', name: '臨陣磨槍者', desc: '不到最後一刻絕不行動，享受壓線的快感。' },
+    { code: 'R', name: '叛逆者', desc: '越是被要求就越不想做，用拖延來對抗控制。' },
+    { code: 'O', name: '過勞者', desc: '承擔了過多責任，精疲力盡導致效率低落。' }
+];
+
+/**
+ * 顯示所有拖延人格介紹 (Task 3)
+ */
+function showAllPersonalities() {
+    currentSlideIndex = 0; // 預設從第一個開始
+    renderSlide();
+}
+
+/**
+ * 渲染單一人格 Slide
+ */
+function renderSlide() {
+    const p = personalityList[currentSlideIndex];
+    const frame = document.querySelector(".card-main-frame");
+    
+    frame.innerHTML = `
+        <div class="top-group">
+            <h2 style="color: #c9a063; font-size: 1.2rem; text-shadow: 1px 1px 2px black;">人格圖鑑 (${currentSlideIndex + 1}/${personalityList.length})</h2>
+        </div>
+        
+        <div class="middle-group" style="display: flex; flex-direction: column; align-items: center; justify-content: flex-start; position: relative; height: 100%; padding-top: 10px;">
+            
+            <!-- 左右切換按鈕 -->
+            <button onclick="changeSlide(-1)" class="slider-nav-btn prev">&lt;</button>
+            <button onclick="changeSlide(1)" class="slider-nav-btn next">&gt;</button>
+
+            <!-- 內容區 (含動畫 wrapper) -->
+            <div class="slider-anim">
+                <!-- 圖片容器 (固定高度) -->
+                <div class="slider-img-container">
+                    <img src="img/${p.code}.png" alt="${p.name}" class="slider-img">
+                </div>
+                
+                <!-- 說明框 (半透明襯底) -->
+                <div class="desc-box">
+                    <h2 class="desc-title">${p.name}</h2>
+                    <p class="desc-text">${p.desc}</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="bottom-group">
+            <button class="option-btn" onclick="showResult()">返回結果</button>
+            <button class="option-btn" onclick="renderStartScreen()">回到首頁</button>
+        </div>
+    `;
+}
+
+/**
+ * 切換 Slide
+ * @param {number} dir -1 or 1
+ */
+function changeSlide(dir) {
+    currentSlideIndex += dir;
+    
+    // 循環切換
+    if (currentSlideIndex < 0) {
+        currentSlideIndex = personalityList.length - 1;
+    } else if (currentSlideIndex >= personalityList.length) {
+        currentSlideIndex = 0;
+    }
+    
+    renderSlide();
+}
+
+// 應用程式啟動
+renderStartScreen();

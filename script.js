@@ -101,8 +101,8 @@ function renderStartScreen() {
         <div class="top-group" style="margin-top: 10%;">
              <!-- LOGO 與標題容器 -->
              <div style="display: flex; flex-direction: column; align-items: center; width: 100%;">
-                 <img src="img/LOGO.png" alt="Delay or Deliver Dungeon Logo" style="max-width: 100%; max-height: 35vh; width: auto; object-fit: contain; filter: drop-shadow(0 0 20px rgba(255, 255, 255, 0.6));">
-                 <p style="color: #000; font-size: 1.8rem; margin-top: -5px; letter-spacing: 4px; font-weight: bold; max-width: 100%; max-height: 35vh;">人格測驗</p>
+                 <img src="img/LOGO.png" alt="Delay or Deliver Dungeon Logo" style="max-width: 100%; max-height: 35vh; width: auto; object-fit: contain; ">
+                 <p style="color: #000; font-size: 1.8rem; margin-top: -5px; letter-spacing: 4px; font-weight: bold; ">人格測驗</p>
              </div>
         </div>
         <div class="middle-group">
@@ -252,7 +252,7 @@ function showResult() {
     finalFrame.classList.remove('layout-slider');
     finalFrame.innerHTML = `
         <div class="top-group">
-            <h2 style="color: #fff; font-size: 1.2rem;">測驗結果</h2>
+            <h2 style="color: #3e3b3b; font-size: 1.2rem; text-shadow: none;">測驗結果</h2>
         </div>
         <div class="middle-group" style="align-items: center; justify-content: center;">
             <img src="img/${resultKey}.png" alt="${resultData.name}" style="max-width: 90%; height: 55%; object-fit: contain; filter: drop-shadow(0 0 10px rgba(0,0,0,0.5));">
@@ -307,7 +307,7 @@ function renderSlide() {
     
     frame.innerHTML = `
         <div class="top-group">
-            <h2 style="color: #c9a063; font-size: 1.2rem; text-shadow: 1px 1px 2px black;">人格圖鑑 (${currentSlideIndex + 1}/${personalityList.length})</h2>
+            <h2 style="color: #3e3b3b; font-size: 1.2rem; text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);">人格圖鑑 (${currentSlideIndex + 1}/${personalityList.length})</h2>
         </div>
         
         <div class="middle-group">

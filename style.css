@@ -1,6 +1,6 @@
 /* 基礎設定 */
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-body { background-color: #1a1a1a; font-family: "Microsoft JhengHei", sans-serif; overflow: hidden; }
+body { background-color: #393939; font-family: "Microsoft JhengHei", sans-serif; overflow: hidden; }
 
 .page-wrapper {
     display: flex;
@@ -16,7 +16,7 @@ body { background-color: #1a1a1a; font-family: "Microsoft JhengHei", sans-serif;
     aspect-ratio: 1 / 2;
     position: relative;
     box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-    background: #706d6d;
+    background: #ECE8E3;
     margin: 0 auto;
 }
 
@@ -94,13 +94,13 @@ body { background-color: #1a1a1a; font-family: "Microsoft JhengHei", sans-serif;
 
 /* 題目文字樣式 */
 #question-text {
-    color: #f0e6d2;
+    color: #3e3b3b; /* 改為深灰色以適應淺背景 */
     text-align: center;
     font-size: clamp(1rem, 4.5vw, 1.4rem);
     line-height: 1.5;
     font-weight: 700;
     letter-spacing: 1px;
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.9);
+    text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5); /* 改為柔和的白色高光 */
 }
 
 /* 選項按鈕樣式 (立體卡牌風格) */
@@ -111,6 +111,7 @@ body { background-color: #1a1a1a; font-family: "Microsoft JhengHei", sans-serif;
     margin-bottom: clamp(6px, 2vh, 12px);
     background: linear-gradient(145deg, #2b2b2b, #1f1f1f);
     border: 2px solid #c9a063;
+    border-radius: 8px; /* 增加圓角 */
     box-shadow: inset 0 0 10px rgba(0,0,0,0.8), 0 4px 6px rgba(0,0,0,0.5);
     color: #e0e0e0;
     font-size: clamp(0.85rem, 3vw, 1rem);

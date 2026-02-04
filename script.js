@@ -14,7 +14,7 @@ const personalityList = [
     { code: 'W', name: '杞人憂天者', desc: '因為過多的擔憂與過度的準備，讓你常常在路口止步不前。冒險本就充滿未知，試著放手去做，你會發現自己比想像中更強大。' },
     { code: 'L', name: '臨陣磨槍者', desc: '習慣在死線逼近時才爆發戰力。雖然衝刺的快感很迷人，但規律的節奏能讓你走得更遠，且不至於在戰鬥後徹底癱瘓。' },
     { code: 'R', name: '叛逆者', desc: '討厭被公會的規章所束縛，拖延是你表達自我的方式。尋找冒險中真正令你感興趣的意義，讓動力從心出發而非為了對抗。' },
-    { code: 'O', name: '過勞者', desc: '過度的努力讓你雖然戰果豐碩，但也早已身心俱疲。請記得「休息」也是冒險的一部分，才能在地牢深處走得更久。' }
+    { code: 'O', name: '過勞者', desc: '過度的努力讓你雖然戰果豐碩，但也早已身心俱趕。請記得「休息」也是冒險的一部分，才能在地牢深處走得更久。' }
 ];
 
 // 2. 題目資料 (包含您提到的多重加權設定)
@@ -96,6 +96,7 @@ const quizData = [
  */
 function renderStartScreen() {
     const frame = document.querySelector(".card-main-frame");
+    if (!frame) return;
     frame.classList.remove('layout-slider');
     frame.innerHTML = `
         <div class="top-group start-screen-top-spacer">
@@ -261,7 +262,7 @@ function showResult() {
             <h2 class="result-screen-title">測驗結果</h2>
         </div>
         <div class="middle-group result-container-center">
-            <img src="img/${resultKey}.png" alt="${resultData.name}" class="result-img">
+            <img src="img/${resultKey}.png" alt="${resultData.name}" class="result-img" onclick="openModal('img/${resultKey}.png')">
             <h1 class="result-name-text">${resultData.name}</h1>
             <div class="result-desc-box">
                 <p class="result-desc-text">你是地下城中的${resultData.name}，${resultData.desc}</p>
@@ -325,7 +326,7 @@ function renderSlide() {
             <div class="slider-anim">
                 <!-- 圖片容器 (固定高度) -->
                 <div class="slider-img-container">
-                    <img src="img/${p.code}.png" alt="${p.name}" class="slider-img">
+                    <img src="img/${p.code}.png" alt="${p.name}" class="slider-img" onclick="openModal('img/${p.code}.png')">
                 </div>
                 
                 <!-- 說明框 (半透明襯底) -->
@@ -373,5 +374,169 @@ function changeSlide(dir) {
     renderSlide();
 }
 
+/* --- Modal 功能實作 --- */
+const modal = document.getElementById('img-modal');
+const modalImg = document.getElementById('modal-image');
+const closeBtn = document.getElementById('modal-close');
+
+let imgScale = 1;
+let imgTranslateX = 0;
+let imgTranslateY = 0;
+let isDragging = false;
+let startDragX = 0;
+let startDragY = 0;
+
+// 雙指縮放變數
+let initialDistance = 0;
+let initialScale = 1;
+
+function initModal() {
+    if (!modal || !modalImg || !closeBtn) return;
+
+    // 關閉按鈕
+    closeBtn.addEventListener('click', closeModal);
+    
+    // 點擊背景關閉 (但在圖片上拖曳時不應關閉)
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal || e.target.classList.contains('modal-content')) {
+            closeModal();
+        }
+    });
+
+    // 滾輪縮放
+    modal.addEventListener('wheel', handleWheel, { passive: false });
+
+    // 滑鼠拖曳
+    modalImg.addEventListener('mousedown', startDrag);
+    window.addEventListener('mousemove', drag);
+    window.addEventListener('mouseup', endDrag);
+
+    // 觸控事件 (拖曳與縮放)
+    modalImg.addEventListener('touchstart', handleTouchStart, { passive: false });
+    modalImg.addEventListener('touchmove', handleTouchMove, { passive: false });
+    modalImg.addEventListener('touchend', handleTouchEnd);
+    
+    // 雙擊放大
+    modalImg.addEventListener('dblclick', handleDoubleClick);
+}
+
+function openModal(src) {
+    if(!modal) return;
+    modalImg.src = src;
+    modal.style.display = 'flex'; // 先顯示以計算尺寸
+    // 強制重繪
+    modal.offsetHeight;
+    modal.classList.add('active');
+    
+    // 重置狀態
+    resetImageState();
+}
+
+function closeModal() {
+    if(!modal) return;
+    modal.classList.remove('active');
+    setTimeout(() => {
+        modal.style.display = 'none';
+        modalImg.src = '';
+    }, 300); // 配合 CSS transition
+}
+
+function resetImageState() {
+    imgScale = 1;
+    imgTranslateX = 0;
+    imgTranslateY = 0;
+    updateTransform();
+}
+
+function updateTransform() {
+    modalImg.style.transform = `translate(${imgTranslateX}px, ${imgTranslateY}px) scale(${imgScale})`;
+}
+
+function handleWheel(e) {
+    e.preventDefault();
+    const delta = e.deltaY * -0.001; // 調整縮放速度
+    const newScale = Math.min(Math.max(0.5, imgScale + delta), 5); // 限制縮放範圍
+    
+    imgScale = newScale;
+    updateTransform();
+}
+
+function startDrag(e) {
+    e.preventDefault();
+    isDragging = true;
+    startDragX = e.clientX - imgTranslateX;
+    startDragY = e.clientY - imgTranslateY;
+    modalImg.style.cursor = 'grabbing';
+}
+
+function drag(e) {
+    if (!isDragging) return;
+    e.preventDefault();
+    imgTranslateX = e.clientX - startDragX;
+    imgTranslateY = e.clientY - startDragY;
+    updateTransform();
+}
+
+function endDrag() {
+    isDragging = false;
+    modalImg.style.cursor = 'grab';
+}
+
+function handleDoubleClick(e) {
+    if (imgScale !== 1) {
+        resetImageState();
+    } else {
+        imgScale = 2.5; // 放大倍率
+        updateTransform();
+    }
+}
+
+// 觸控邏輯
+function handleTouchStart(e) {
+    if (e.touches.length === 1) {
+        // 單指拖曳
+        isDragging = true;
+        startDragX = e.touches[0].clientX - imgTranslateX;
+        startDragY = e.touches[0].clientY - imgTranslateY;
+    } else if (e.touches.length === 2) {
+        // 雙指縮放
+        isDragging = false; // 縮放時不拖曳
+        initialDistance = getDistance(e.touches);
+        initialScale = imgScale;
+    }
+}
+
+function handleTouchMove(e) {
+    if (e.touches.length > 0) {
+        e.preventDefault(); // 防止頁面捲動
+    }
+    if (e.touches.length === 1 && isDragging) {
+        imgTranslateX = e.touches[0].clientX - startDragX;
+        imgTranslateY = e.touches[0].clientY - startDragY;
+        updateTransform();
+    } else if (e.touches.length === 2) {
+        const currentDistance = getDistance(e.touches);
+        if (initialDistance > 0) {
+            const scaleFactor = currentDistance / initialDistance;
+            imgScale = Math.min(Math.max(0.5, initialScale * scaleFactor), 5);
+            updateTransform();
+        }
+    }
+}
+
+function handleTouchEnd(e) {
+    isDragging = false;
+    if (e.touches.length < 2) {
+        initialDistance = 0;
+    }
+}
+
+function getDistance(touches) {
+    const dx = touches[0].clientX - touches[1].clientX;
+    const dy = touches[0].clientY - touches[1].clientY;
+    return Math.sqrt(dx * dx + dy * dy);
+}
+
 // 應用程式啟動
+initModal();
 renderStartScreen();

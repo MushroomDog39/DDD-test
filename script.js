@@ -10,11 +10,11 @@ let touchEndX = 0;
 
 const personalityList = [
     { code: 'P', name: '完美主義者', desc: '追求絕對的無瑕讓你難以邁出第一步。請試著接受「完成優於完美」，即使裝備有些許刮痕，也依然能完成一場精彩的冒險。' },
-    { code: 'D', name: '夢想家', desc: '腦中充滿了美妙的冒險藍圖，卻常在幻想中流連忘返。請嘗試將宏大的計畫拆解成小步標，現在就踏出營地，實踐你的奇思妙想吧！' },
+    { code: 'D', name: '夢想家', desc: '腦中充滿了美妙的冒險藍圖，卻常在幻想中流連忘返。請嘗試將的計畫拆解成小步標，現在就踏出營地，實踐你的奇思妙想吧！' },
     { code: 'W', name: '杞人憂天者', desc: '因為過多的擔憂與過度的準備，讓你常常在路口止步不前。冒險本就充滿未知，試著放手去做，你會發現自己比想像中更強大。' },
-    { code: 'L', name: '臨陣磨槍者', desc: '習慣在死線逼近、腎上腺素飆升時才爆發戰力。雖然衝刺的快感很迷人，但規律的節奏能讓你走得更遠，且不至於在戰鬥後徹底癱瘓。' },
-    { code: 'R', name: '叛逆者', desc: '不喜歡被公會的任務規章所束縛，拖延是你表達自我的方式。試著尋找冒險中真正令你感興趣的意義，讓動力從心出發而非為了對抗。' },
-    { code: 'O', name: '過勞者', desc: '過度的努力讓你雖然戰果豐碩，但也早已身心俱疲。請記得「休息」也是冒險的一部分，學會適時放下重擔，你才能在地牢深處走得更久。' }
+    { code: 'L', name: '臨陣磨槍者', desc: '習慣在死線逼近時才爆發戰力。雖然衝刺的快感很迷人，但規律的節奏能讓你走得更遠，且不至於在戰鬥後徹底癱瘓。' },
+    { code: 'R', name: '叛逆者', desc: '討厭被公會的規章所束縛，拖延是你表達自我的方式。尋找冒險中真正令你感興趣的意義，讓動力從心出發而非為了對抗。' },
+    { code: 'O', name: '過勞者', desc: '過度的努力讓你雖然戰果豐碩，但也早已身心俱疲。請記得「休息」也是冒險的一部分，才能在地牢深處走得更久。' }
 ];
 
 // 2. 題目資料 (包含您提到的多重加權設定)
@@ -98,11 +98,11 @@ function renderStartScreen() {
     const frame = document.querySelector(".card-main-frame");
     frame.classList.remove('layout-slider');
     frame.innerHTML = `
-        <div class="top-group" style="margin-top: 10%;">
+        <div class="top-group start-screen-top-spacer">
              <!-- LOGO 與標題容器 -->
-             <div style="display: flex; flex-direction: column; align-items: center; width: 100%;">
-                 <img src="img/LOGO.png" alt="Delay or Deliver Dungeon Logo" style="max-width: 100%; max-height: 35vh; width: auto; object-fit: contain; ">
-                 <p style="color: #000; font-size: 1.8rem; margin-top: -5px; letter-spacing: 4px; font-weight: bold; ">人格測驗</p>
+             <div class="start-logo-container">
+                 <img src="img/LOGO.png" alt="Delay or Deliver Dungeon Logo" class="start-logo-img">
+                 <p class="start-title-text">人格測驗</p>
              </div>
         </div>
         <div class="middle-group">
@@ -243,7 +243,13 @@ function updateDebugScore() {
  * 顯示最終結果
  */
 function showResult() {
-    const resultKey = Object.keys(scores).reduce((a, b) => scores[a] > scores[b] ? a : b);
+    // 找出最高分的分數
+    const maxScore = Math.max(...Object.values(scores));
+    // 找出所有達到最高分的人格 (處理同分狀況)
+    const topPersonalities = Object.keys(scores).filter(key => scores[key] === maxScore);
+    
+    // 從最高分候選中隨機選出一個
+    const resultKey = topPersonalities[Math.floor(Math.random() * topPersonalities.length)];
     
     // 從 personalityList 中查找結果數據
     const resultData = personalityList.find(p => p.code === resultKey);
@@ -252,13 +258,13 @@ function showResult() {
     finalFrame.classList.remove('layout-slider');
     finalFrame.innerHTML = `
         <div class="top-group">
-            <h2 style="color: #3e3b3b; font-size: 1.2rem; text-shadow: none;">測驗結果</h2>
+            <h2 class="result-screen-title">測驗結果</h2>
         </div>
-        <div class="middle-group" style="align-items: center; justify-content: center;">
-            <img src="img/${resultKey}.png" alt="${resultData.name}" style="max-width: 90%; height: 55%; object-fit: contain; filter: drop-shadow(0 0 10px rgba(0,0,0,0.5));">
-            <h1 style="color: #c9a063; font-size: clamp(1.4rem, 6vw, 1.8rem); margin: 5px 0;">${resultData.name}</h1>
+        <div class="middle-group result-container-center">
+            <img src="img/${resultKey}.png" alt="${resultData.name}" class="result-img">
+            <h1 class="result-name-text">${resultData.name}</h1>
             <div class="result-desc-box">
-                <p style="color: #ddd; font-size: clamp(0.8rem, 3.2vw, 0.9rem); text-align: justify; line-height: 1.5;">你是地下城中的${resultData.name}，${resultData.desc}</p>
+                <p class="result-desc-text">你是地下城中的${resultData.name}，${resultData.desc}</p>
             </div>
         </div>
         <div class="bottom-group">
@@ -307,7 +313,7 @@ function renderSlide() {
     
     frame.innerHTML = `
         <div class="top-group">
-            <h2 style="color: #3e3b3b; font-size: 1.2rem; text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);">人格圖鑑 (${currentSlideIndex + 1}/${personalityList.length})</h2>
+            <h2 class="slide-screen-title">人格圖鑑 (${currentSlideIndex + 1}/${personalityList.length})</h2>
         </div>
         
         <div class="middle-group">

@@ -1,0 +1,418 @@
+/* 基礎設定 */
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+body { background-color: #393939; font-family: "Microsoft JhengHei", sans-serif; overflow-y: auto; overflow-x: hidden; }
+
+.page-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+/* 1:2 卡牌容器 */
+.card-container {
+    height: 100vh; 
+    width: auto;   
+    aspect-ratio: 1 / 2;
+    position: relative;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    background: #ECE8E3;
+    margin: 0 auto;
+    /* 啟用 Container Queries，讓子元素可使用 cqw/cqh 單位進行絕對等比縮放 */
+    container-type: size;
+    container-name: card;
+}
+
+@media (max-aspect-ratio: 1/2) {
+    .page-wrapper {
+        align-items: flex-start; /* 讓卡片靠上對齊 */
+    }
+    .card-container {
+        width: 100vw;
+        height: auto;
+        aspect-ratio: 1 / 2; /* 強制維持 1:2 */
+        min-height: 0; /* 移除原本的 100vh 強制拉伸 */
+        max-height: none;
+        padding: 0;
+        /* padding-bottom removed, layout should handle internal spacing */
+    }
+}
+
+/* 卡牌內容與外框 (通用設定) */
+.card-main-frame {
+    width: 100%;
+    height: 100%;
+    background-image: url('bg_card.png'); 
+    background-size: 100% 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between; /* 預設為分散對齊，適合首頁與測驗頁 */
+    /* 增加底部 Padding，讓按鈕不會貼底 */
+    padding: clamp(30px, 12%, 60px) clamp(20px, 10%, 50px) clamp(40px, 12%, 60px) clamp(20px, 10%, 50px);
+    overflow: hidden; 
+}
+
+/* 通用區塊設定 (預設彈性) */
+.top-group {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 1 auto; /* 自然高度 */
+}
+
+.middle-group {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    flex: 1; /* 佔據剩餘空間 */
+    min-height: 0; /* 關鍵修正：允許 Flex 子項目縮小，防止內容撐大容器 */
+    justify-content: center;
+    position: relative;
+    overflow: visible; /* 預設不隱藏溢出，以免切到陰影 */
+}
+
+.bottom-group {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    flex: 0 1 auto; /* 自然高度 */
+    z-index: 10; /* 確保按鈕層級較高 */
+}
+
+/* --- Slider 專用佈局模式 (嚴格鎖定) --- */
+.card-main-frame.layout-slider {
+    justify-content: flex-start; /* 改為靠上，由內部比例控制 */
+}
+
+.card-main-frame.layout-slider .top-group {
+    flex: 0 0 15%;
+    overflow: visible; /* 允許下方圖片向上溢出時顯示光暈 */
+    z-index: 5; /* 確保標題層級高於圖片 */
+}
+
+.card-main-frame.layout-slider .middle-group {
+    flex: 0 0 62%;
+    justify-content: flex-start;
+    overflow: visible; /* 允許圖片光暈溢出 */
+}
+
+.card-main-frame.layout-slider .bottom-group {
+    flex: 0 0 23%;
+    justify-content: center;
+    overflow: hidden;
+}
+
+/* 題目文字樣式 */
+#question-text {
+    color: #3e3b3b; /* 改為深灰色以適應淺背景 */
+    text-align: center;
+    /* 使用 cqw 單位，字體將永遠佔據卡片寬度的約 6.5% */
+    font-size: 6.5cqw;
+    line-height: 1.5;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5); /* 改為柔和的白色高光 */
+}
+
+/* 選項按鈕樣式 (立體卡牌風格) */
+.option-btn {
+    display: block;
+    width: 100%;
+    padding: clamp(8px, 2.5vw, 12px);
+    margin-bottom: clamp(6px, 2vh, 12px);
+    background: linear-gradient(145deg, #2b2b2b, #1f1f1f);
+    border: 2px solid #c9a063;
+    border-radius: 8px; /* 增加圓角 */
+    box-shadow: inset 0 0 10px rgba(0,0,0,0.8), 0 4px 6px rgba(0,0,0,0.5);
+    color: #e0e0e0;
+    /* 使用 cqw 單位，字體將永遠佔據卡片寬度的約 4.5% */
+    font-size: 4.5cqw;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.1s ease;
+    text-align: center;
+    position: relative;
+}
+
+.option-btn:hover {
+    background: linear-gradient(145deg, #c9a063, #a08040);
+    color: #1a1a1a;
+}
+
+.option-btn:active {
+    transform: scale(0.96); /* 按下縮放效果 */
+    filter: brightness(1.1); /* 稍微變亮 */
+    box-shadow: inset 0 2px 5px rgba(0,0,0,0.8);
+}
+
+#back-btn {
+    background: #3e3b3b;
+    border: 1px solid #c9a063;
+    color: #c9a063;
+    cursor: pointer;
+    min-width: 100px;
+    padding: 6px 12px;
+    font-size: 0.85rem;
+    margin: 0 auto;
+    display: block;
+    border-radius: 4px;
+    transition: transform 0.1s;
+}
+
+#back-btn:active {
+    transform: scale(0.95);
+}
+
+#debug-panel {
+    position: fixed;
+    top: 5px; right: 5px;
+    background: rgba(0, 0, 0, 0.8);
+    color: #00ff00;
+    padding: 5px;
+    font-size: 10px;
+    z-index: 1000;
+    pointer-events: none;
+    display: none; /* 隱藏測試面板 */
+}
+
+/* 定義動畫 */
+@keyframes fadeInSlide {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+.card-main-frame { animation: fadeInSlide 0.5s ease-out; }
+
+/* Slider 樣式 (配合 layout-slider 使用) */
+.slider-nav-btn {
+    position: absolute;
+    top: 35%; 
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: #c9a063;
+    font-size: 2.5rem;
+    cursor: pointer;
+    z-index: 20; /* 提高層級 */
+    text-shadow: 0 0 5px #000;
+    transition: transform 0.1s, opacity 0.2s;
+}
+.slider-nav-btn:active {
+    transform: translateY(-50%) scale(0.85); /* 按下縮小 */
+    opacity: 0.6;
+}
+/* 內縮按鈕，避免被 Padding 或 Overflow 切到 */
+.slider-nav-btn.prev { left: 0; }
+.slider-nav-btn.next { right: 0; }
+
+.slider-img-container {
+    width: 100%;
+    /* 增加比例以放大立繪，從 62% 提升到 68% */
+    flex: 0 0 68%; 
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    overflow: hidden;
+    /* 關鍵修正：透過負 margin 上移圖片，讓下方說明框有更多空間 */
+    margin-top: -8%; 
+}
+.slider-img {
+    max-width: 100%;
+    height: 100%;
+    object-fit: contain;
+    filter: drop-shadow(0 0 10px rgba(0,0,0,0.5));
+}
+
+.desc-box {
+    background: rgba(20, 20, 20, 0.85);
+    border: 2px solid #806030;
+    border-radius: 8px;
+    padding: 10px;
+    width: 100%;
+    box-shadow: inset 0 0 15px rgba(0,0,0,0.8);
+    position: relative;
+    flex: 0 1 auto; /* 從固定 33% 改為自適應 */
+    margin-top: 2%; /* 進一步縮減間距以留空間給立繪 */
+    /* 增加底部間距，避免與下方按鈕太近 */
+    margin-bottom: 10px;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    max-height:50%; /* 增加最大高度限制 */
+}
+
+.desc-title {
+    color: #c9a063;
+    font-size: 5.5cqw;
+    margin-bottom: 5px;
+}
+.desc-text {
+    color: #ddd;
+    font-size: 3.8cqw;
+    line-height: 1.4;
+    text-align: justify;
+}
+
+@keyframes sliderEntry {
+    from { opacity: 0; transform: translateX(5px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+.slider-anim {
+    animation: sliderEntry 0.3s ease-out;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+/* 測驗結果頁描述襯底 */
+.result-desc-box {
+    background: rgba(20, 20, 20, 0.7);
+    border: 1px solid #c9a063;
+    border-radius: 8px;
+    padding: 12px;
+    width: 100%;
+    box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
+    margin-top: 2px; /* 縮減間距 */
+    /* 修正：進一步增加高度限制，確保文字不溢出 */
+    max-height: 60%; 
+    overflow-y: auto;
+    flex: 0 1 auto;
+    margin-bottom: 10px; /* 增加與下方按鈕的間距 */
+}
+
+/* --- Refactored JS Inline Styles --- */
+
+/* Start Screen */
+.start-screen-top-spacer {
+    margin-top: 10%;
+}
+.start-logo-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+}
+.start-logo-img {
+    max-width: 100%;
+    max-height: 35vh;
+    width: auto;
+    object-fit: contain;
+}
+.start-title-text {
+    color: #000;
+    font-size: 8cqw;
+    margin-top: -5px;
+    letter-spacing: 4px;
+    font-weight: bold;
+}
+
+/* Result Screen */
+.result-screen-title {
+    color: #3e3b3b;
+    font-size: 5.5cqw;
+    text-shadow: none;
+}
+.result-container-center {
+    align-items: center;
+    justify-content: center;
+}
+/* Visual Fix: Use flex: 1 for adaptive height instead of fixed 55% */
+.result-img {
+    max-width: 95%; /* 稍微增加寬度上限 */
+    /* 增加最大高度以確保大於圖鑑頁立繪 */
+    max-height: 65%;
+    flex: 0 1 auto; 
+    min-height: 0; /* Important for flex items to shrink properly */
+    object-fit: contain;
+    filter: drop-shadow(0 0 10px rgba(0,0,0,0.5));
+}
+.result-name-text {
+    color: #c9a063;
+    font-size: 7cqw; 
+    margin: 0;   /* 移除所有 margin 以節省空間 */
+}
+.result-desc-text {
+    color: #ddd;
+    font-size: 3.8cqw;
+    text-align: justify;
+    line-height: 1.5;
+}
+
+/* Slide Screen */
+.slide-screen-title {
+    color: #3e3b3b;
+    font-size: 5.5cqw;
+    text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);
+    margin-top: -5%; /* 上移標題 */
+}
+
+/* Modal 樣式 */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.85);
+    z-index: 9999;
+    display: none; /* 預設隱藏 */
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.modal-overlay.active {
+    display: flex;
+    opacity: 1;
+}
+
+.modal-content {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+}
+
+#modal-image {
+    max-width: 90%;
+    max-height: 90%;
+    object-fit: contain;
+    transform-origin: center center;
+    cursor: grab;
+    user-select: none;
+    -webkit-user-drag: none;
+    will-change: transform;
+}
+
+#modal-image:active {
+    cursor: grabbing;
+}
+
+.modal-close-btn {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 40px;
+    font-weight: bold;
+    cursor: pointer;
+    z-index: 10000;
+    line-height: 1;
+    text-shadow: 0 0 5px rgba(0,0,0,0.5);
+    opacity: 0.8;
+    transition: opacity 0.2s;
+}
+
+.modal-close-btn:hover {
+    opacity: 1;
+    transform: scale(1.1);
+}

@@ -92,6 +92,17 @@ const quizData = [
 ];
 
 /**
+ * 觸發頁面切換動畫
+ */
+function triggerAnimation() {
+    const frame = document.querySelector(".card-main-frame");
+    if (!frame) return;
+    frame.style.animation = 'none';
+    frame.offsetHeight; // 觸發重繪
+    frame.style.animation = null;
+}
+
+/**
  * 渲染開始畫面 (Task 1)
  */
 function renderStartScreen() {
@@ -113,6 +124,9 @@ function renderStartScreen() {
             <button class="option-btn" onclick="setTimeout(startQuiz, 100)">開始挑戰</button>
         </div>
     `;
+    
+    triggerAnimation();
+
     // 確保 debug 面板重置
     scores = { P: 0, D: 0, W: 0, L: 0, R: 0, O: 0 };
     const debugPanel = document.getElementById("debug-panel");
@@ -274,6 +288,8 @@ function showResult() {
         </div>
     `;
     
+    triggerAnimation();
+
     const debugPanel = document.getElementById("debug-panel");
     if (debugPanel) debugPanel.style.display = "none";
 }
@@ -304,6 +320,8 @@ function handleGesture() {
     }
 }
 
+let lastDir = 1; // 紀錄最後一次切換的方向 (1 為向後/向右, -1 為向前/向左)
+
 /**
  * 渲染單一人格 Slide
  */
@@ -312,6 +330,9 @@ function renderSlide() {
     const frame = document.querySelector(".card-main-frame");
     frame.classList.add('layout-slider');
     
+    // 根據方向決定動畫 class
+    const animClass = lastDir > 0 ? 'slide-right' : 'slide-left';
+
     frame.innerHTML = `
         <div class="top-group">
             <h2 class="slide-screen-title">人格圖鑑 (${currentSlideIndex + 1}/${personalityList.length})</h2>
@@ -323,7 +344,7 @@ function renderSlide() {
             <button onclick="setTimeout(() => changeSlide(1), 100)" class="slider-nav-btn next">&gt;</button>
 
             <!-- 內容區 (含動畫 wrapper) -->
-            <div class="slider-anim">
+            <div class="slider-anim ${animClass}">
                 <!-- 圖片容器 (固定高度) -->
                 <div class="slider-img-container">
                     <img src="img/${p.code}.png" alt="${p.name}" class="slider-img" onclick="openModal('img/${p.code}.png')">
@@ -362,6 +383,7 @@ function renderSlide() {
  * @param {number} dir -1 or 1
  */
 function changeSlide(dir) {
+    lastDir = dir; // 更新方向
     currentSlideIndex += dir;
     
     // 循環切換
@@ -539,4 +561,83 @@ function getDistance(touches) {
 
 // 應用程式啟動
 initModal();
-renderStartScreen();
+
+/* --- 資產預載入邏輯 --- */
+const assetsToPreload = [
+    'img/LOGO.png',
+    'img/P.png',
+    'img/D.png',
+    'img/W.png',
+    'img/L.png',
+    'img/R.png',
+    'img/O.png',
+    'bg_card.png'
+];
+
+let loadedCount = 0;
+const loadingBar = document.getElementById('loading-bar');
+const loadingScreen = document.getElementById('loading-screen');
+const loadingDots = document.getElementById('loading-dots');
+
+function startLoadingAnimation() {
+    let dots = 0;
+    setInterval(() => {
+        dots = (dots + 1) % 4;
+        if (loadingDots) {
+            loadingDots.innerText = '.'.repeat(dots);
+        }
+    }, 500);
+}
+
+function preloadAssets() {
+    const total = assetsToPreload.length;
+    
+    // 啟動點點動畫
+    startLoadingAnimation();
+
+    if (total === 0) {
+        finishLoading();
+        return;
+    }
+
+    assetsToPreload.forEach(src => {
+        const img = new Image();
+        img.src = src;
+        img.onload = () => {
+            loadedCount++;
+            updateProgress(loadedCount, total);
+        };
+        img.onerror = () => {
+            console.warn(`Failed to load asset: ${src}`);
+            // 即使失敗也算完成，避免卡住
+            loadedCount++;
+            updateProgress(loadedCount, total);
+        };
+    });
+}
+
+function updateProgress(count, total) {
+    const percentage = Math.floor((count / total) * 100);
+    if (loadingBar) {
+        loadingBar.style.width = `${percentage}%`;
+    }
+
+    if (count >= total) {
+        // 給一點緩衝時間讓使用者看到 100%
+        setTimeout(finishLoading, 500);
+    }
+}
+
+function finishLoading() {
+    if (loadingScreen) {
+        loadingScreen.classList.add('hidden');
+        // 等待淡出動畫結束後再移除 (可選)
+        setTimeout(() => {
+            loadingScreen.style.display = 'none';
+        }, 500);
+    }
+    renderStartScreen();
+}
+
+// 開始預載入
+preloadAssets();

@@ -92,14 +92,14 @@ const quizData = [
 ];
 
 /**
- * 觸發頁面切換動畫
+ * 觸發指定元素的內容動畫
+ * @param {HTMLElement} element - 要觸發動畫的元素
  */
-function triggerAnimation() {
-    const frame = document.querySelector(".card-main-frame");
-    if (!frame) return;
-    frame.style.animation = 'none';
-    frame.offsetHeight; // 觸發重繪
-    frame.style.animation = null;
+function triggerContentAnimation(element) {
+    if (!element) return;
+    element.classList.remove("animate-content");
+    element.offsetHeight; // 觸發重繪
+    element.classList.add("animate-content");
 }
 
 /**
@@ -110,7 +110,7 @@ function renderStartScreen() {
     if (!frame) return;
     frame.classList.remove('layout-slider');
     frame.innerHTML = `
-        <div class="top-group start-screen-top-spacer">
+        <div class="top-group start-screen-top-spacer animate-content">
              <!-- LOGO 與標題容器 -->
              <div class="start-logo-container">
                  <img src="img/LOGO.png" alt="Delay or Deliver Dungeon Logo" class="start-logo-img">
@@ -125,8 +125,6 @@ function renderStartScreen() {
         </div>
     `;
     
-    triggerAnimation();
-
     // 確保 debug 面板重置
     scores = { P: 0, D: 0, W: 0, L: 0, R: 0, O: 0 };
     const debugPanel = document.getElementById("debug-panel");
@@ -143,13 +141,18 @@ function startQuiz() {
     const frame = document.querySelector(".card-main-frame");
     frame.classList.remove('layout-slider');
     // 重建測驗 DOM 結構
+    // 修正：預設將上一題按鈕設為 display: none，徹底避免第一題閃爍
+    // 新增：加入地牢風格進度條容器，並賦予一次性淡入動畫 (animate-content)
     frame.innerHTML = `
-          <div class="top-group">
+          <div class="top-group" style="flex-direction: column;">
+            <div class="quiz-progress-container animate-content">
+                <div id="quiz-progress-bar" class="quiz-progress-bar"></div>
+            </div>
             <h2 id="question-text"></h2>
           </div>
           <div class="middle-group" id="options-container"> </div>
           <div class="bottom-group">
-            <button id="back-btn" onclick="setTimeout(previousQuestion, 100)">上一題</button>
+            <button id="back-btn" style="display: none;" onclick="setTimeout(previousQuestion, 100)">上一題</button>
           </div>
     `;
     
@@ -167,17 +170,26 @@ function startQuiz() {
 function loadQuestion() {
     const qData = quizData[currentStep];
     const frame = document.querySelector(".card-main-frame");
+    const backBtn = document.getElementById("back-btn");
+    const progressBar = document.getElementById("quiz-progress-bar");
 
-    // --- 動態效果：觸發 CSS 動畫重啟 ---
-    frame.style.animation = 'none';
-    frame.offsetHeight; // 觸發重繪 (Reflow)
-    frame.style.animation = null; 
+    // --- 更新進度條 ---
+    if (progressBar) {
+        const progress = ((currentStep) / quizData.length) * 100;
+        progressBar.style.width = `${progress}%`;
+    }
 
-    // --- 內容載入 ---
-    document.getElementById("question-text").innerText = qData.q;
+    // --- 優先處理按鈕顯示邏輯，使用 display: none 確保不閃爍 ---
+    if(backBtn) {
+        backBtn.style.display = currentStep === 0 ? "none" : "block";
+    }
+
+    // --- 內容載入與動畫觸發 ---
+    const qText = document.getElementById("question-text");
+    const optionsContainer = document.getElementById("options-container");
     
-    const container = document.getElementById("options-container");
-    container.innerHTML = ""; // 清空舊選項
+    qText.innerText = qData.q;
+    optionsContainer.innerHTML = ""; // 清空舊選項
 
     qData.options.forEach(opt => {
         const btn = document.createElement("button");
@@ -188,17 +200,15 @@ function loadQuestion() {
         btn.onclick = () => {
             setTimeout(() => selectOption(opt.scores), 100);
         };
-        container.appendChild(btn);
+        optionsContainer.appendChild(btn);
     });
+
+    // 只針對題目和選項容器觸發動畫
+    triggerContentAnimation(qText);
+    triggerContentAnimation(optionsContainer);
 
     // --- 測試功能：更新 Debug 面板 ---
     updateDebugScore();
-
-    // 控制上一題按鈕顯示邏輯
-    const backBtn = document.getElementById("back-btn");
-    if(backBtn) {
-        backBtn.style.visibility = currentStep === 0 ? "hidden" : "visible";
-    }
 }
 
 /**
@@ -272,10 +282,10 @@ function showResult() {
     const finalFrame = document.querySelector(".card-main-frame");
     finalFrame.classList.remove('layout-slider');
     finalFrame.innerHTML = `
-        <div class="top-group">
+        <div class="top-group animate-content">
             <h2 class="result-screen-title">測驗結果</h2>
         </div>
-        <div class="middle-group result-container-center">
+        <div class="middle-group result-container-center animate-content">
             <img src="img/${resultKey}.png" alt="${resultData.name}" class="result-img" onclick="openModal('img/${resultKey}.png')">
             <h1 class="result-name-text">${resultData.name}</h1>
             <div class="result-desc-box">
@@ -287,8 +297,6 @@ function showResult() {
             <button class="option-btn" onclick="setTimeout(renderStartScreen, 100)">重新挑戰</button>
         </div>
     `;
-    
-    triggerAnimation();
 
     const debugPanel = document.getElementById("debug-panel");
     if (debugPanel) debugPanel.style.display = "none";
@@ -641,3 +649,52 @@ function finishLoading() {
 
 // 開始預載入
 preloadAssets();
+
+/* --- 背景粒子效果實作 --- */
+const canvas = document.getElementById('bg-canvas');
+const ctx = canvas.getContext('2d');
+let particles = [];
+
+function initParticles() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    particles = [];
+    const particleCount = Math.floor((canvas.width * canvas.height) / 15000); // 根據螢幕大小調整數量
+    
+    for (let i = 0; i < particleCount; i++) {
+        particles.push({
+            x: Math.random() * canvas.width,
+            y: Math.random() * canvas.height,
+            size: Math.random() * 2 + 0.5,
+            speedX: Math.random() * 0.5 - 0.25,
+            speedY: Math.random() * 0.5 - 0.25,
+            opacity: Math.random() * 0.5 + 0.1
+        });
+    }
+}
+
+function animateParticles() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    particles.forEach(p => {
+        p.x += p.speedX;
+        p.y += p.speedY;
+        
+        // 邊界檢查
+        if (p.x < 0) p.x = canvas.width;
+        if (p.x > canvas.width) p.x = 0;
+        if (p.y < 0) p.y = canvas.height;
+        if (p.y > canvas.height) p.y = 0;
+        
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(201, 160, 99, ${p.opacity})`; // 使用金棕色系
+        ctx.fill();
+    });
+    
+    requestAnimationFrame(animateParticles);
+}
+
+window.addEventListener('resize', initParticles);
+initParticles();
+animateParticles();

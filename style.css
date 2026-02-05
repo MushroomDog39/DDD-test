@@ -2,6 +2,16 @@
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 body { background-color: #393939; font-family: "Microsoft JhengHei", sans-serif; overflow-y: auto; overflow-x: hidden; }
 
+#bg-canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    pointer-events: none;
+}
+
 .page-wrapper {
     display: flex;
     justify-content: center;
@@ -101,7 +111,27 @@ body { background-color: #393939; font-family: "Microsoft JhengHei", sans-serif;
 .card-main-frame.layout-slider .bottom-group {
     flex: 0 0 23%;
     justify-content: center;
+    overflow: visible; /* 修正：允許按鈕懸停陰影與放大效果顯示，避免被裁切 */
+}
+
+/* 測驗進度條樣式 */
+.quiz-progress-container {
+    width: 100%;
+    height: 10px;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 5px;
+    margin-bottom: 20px;
     overflow: hidden;
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.5);
+    border: 1px solid rgba(201, 160, 99, 0.2);
+}
+
+.quiz-progress-bar {
+    width: 0%;
+    height: 100%;
+    background: linear-gradient(90deg, #a08040, #c9a063);
+    box-shadow: 0 0 10px rgba(201, 160, 99, 0.4);
+    transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* 題目文字樣式 */
@@ -139,10 +169,13 @@ body { background-color: #393939; font-family: "Microsoft JhengHei", sans-serif;
 .option-btn:hover {
     background: linear-gradient(145deg, #c9a063, #a08040);
     color: #1a1a1a;
+    border-color: #888; 
+    box-shadow: 0 6px 15px rgba(0,0,0,0.6); /* 加強陰影提升懸浮感 */
+    transform: translateY(-1px) scale(1.01); /* 稍微調小放大倍率 */
 }
 
 .option-btn:active {
-    transform: scale(0.96); /* 按下縮放效果 */
+    transform: translateY(-1px) scale(0.98); /* 按下時縮回 */
     filter: brightness(1.1); /* 稍微變亮 */
     box-shadow: inset 0 2px 5px rgba(0,0,0,0.8);
 }
@@ -158,11 +191,18 @@ body { background-color: #393939; font-family: "Microsoft JhengHei", sans-serif;
     margin: 0 auto;
     display: block;
     border-radius: 4px;
-    transition: transform 0.1s;
+    transition: all 0.2s ease; /* 統一過渡時間 */
+}
+
+#back-btn:hover {
+    background: #666;
+    color: #fff;
+    border-color: #888;
+    transform: translateY(-2px); /* 小按鈕僅微幅上移 */
 }
 
 #back-btn:active {
-    transform: scale(0.95);
+    transform: translateY(0);
 }
 
 #debug-panel {
@@ -179,10 +219,13 @@ body { background-color: #393939; font-family: "Microsoft JhengHei", sans-serif;
 
 /* 定義動畫 */
 @keyframes fadeInSlide {
-    from { opacity: 0; transform: translateY(20px); }
+    from { opacity: 0; transform: translateY(15px); } /* 稍微縮減移動距離，減少晃動感 */
     to { opacity: 1; transform: translateY(0); }
 }
-.card-main-frame { animation: fadeInSlide 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
+
+.animate-content {
+    animation: fadeInSlide 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
 
 /* Slider 樣式 (配合 layout-slider 使用) */
 .slider-nav-btn {

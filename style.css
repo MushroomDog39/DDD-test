@@ -8,8 +8,19 @@ body { background-color: #393939; font-family: "Microsoft JhengHei", sans-serif;
     left: 0;
     width: 100%;
     height: 100%;
-    z-index: -1;
+    z-index: -2; /* 改為 -2，讓遮罩在它上面 */
     pointer-events: none;
+}
+
+#vignette-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1; /* 在畫布之上，內容之下 */
+    pointer-events: none;
+    background: radial-gradient(circle at center, transparent 30%, rgba(0, 0, 0, 0.6) 90%);
 }
 
 .page-wrapper {
@@ -25,9 +36,15 @@ body { background-color: #393939; font-family: "Microsoft JhengHei", sans-serif;
     width: auto;   
     aspect-ratio: 1 / 2;
     position: relative;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    /* 改為使用 inset shadow 與 border，確保框線在容器內，不被邊界切掉 */
+    border: 4px solid #0f0f0f; 
+    box-shadow: 
+        0 20px 60px rgba(0,0,0,0.9), 
+        inset 0 0 0 2px #2a2a2a; /* 內部細邊框 */
+    border-radius: 16px; /* Smooth rounded corners */
     background: #ECE8E3;
     margin: 0 auto;
+    overflow: hidden; /* Ensure rounded corners clip content */
     /* 啟用 Container Queries，讓子元素可使用 cqw/cqh 單位進行絕對等比縮放 */
     container-type: size;
     container-name: card;
@@ -146,17 +163,18 @@ body { background-color: #393939; font-family: "Microsoft JhengHei", sans-serif;
     text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5); /* 改為柔和的白色高光 */
 }
 
-/* 選項按鈕樣式 (立體卡牌風格) */
+/* 選項按鈕樣式 (立體石板/符文風格) */
 .option-btn {
     display: block;
     width: 100%;
-    padding: clamp(8px, 2.5vw, 12px);
-    margin-bottom: clamp(6px, 2vh, 12px);
-    background: linear-gradient(145deg, #2b2b2b, #1f1f1f);
-    border: 2px solid #c9a063;
-    border-radius: 8px; /* 增加圓角 */
-    box-shadow: inset 0 0 10px rgba(0,0,0,0.8), 0 4px 6px rgba(0,0,0,0.5);
-    color: #e0e0e0;
+    padding: clamp(12px, 3.5vw, 16px);
+    margin-bottom: clamp(8px, 2.5vh, 15px);
+    background: linear-gradient(to bottom, #2e2e2e, #1a1a1a);
+    border: 1px solid #6e5a35; /* Bronze border */
+    border-bottom: 3px solid #3e321d; /* Thicker bottom for 3D feel */
+    border-radius: 6px; 
+    box-shadow: 0 4px 8px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.05);
+    color: #c9a063;
     /* 使用 cqw 單位，字體將永遠佔據卡片寬度的約 4.5% */
     font-size: 4.5cqw;
     font-weight: bold;
@@ -164,45 +182,59 @@ body { background-color: #393939; font-family: "Microsoft JhengHei", sans-serif;
     transition: all 0.1s ease;
     text-align: center;
     position: relative;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+    letter-spacing: 0.5px;
+}
+
+/* 特別針對結果頁與圖鑑頁縮小按鈕 */
+.bottom-group .option-btn {
+    padding: clamp(8px, 2.5vw, 12px);
+    font-size: 3.8cqw;
+    margin-bottom: clamp(5px, 1.5vh, 10px);
 }
 
 .option-btn:hover {
-    background: linear-gradient(145deg, #c9a063, #a08040);
-    color: #1a1a1a;
-    border-color: #888; 
-    box-shadow: 0 6px 15px rgba(0,0,0,0.6); /* 加強陰影提升懸浮感 */
-    transform: translateY(-1px) scale(1.01); /* 稍微調小放大倍率 */
+    background: linear-gradient(to bottom, #383838, #222);
+    border-color: #a08040; 
+    border-bottom-color: #6e5a35;
+    color: #f0d090;
+    box-shadow: 0 0 15px rgba(201, 160, 99, 0.2), 0 6px 12px rgba(0,0,0,0.7); 
+    transform: translateY(-2px); 
 }
 
 .option-btn:active {
-    transform: translateY(-1px) scale(0.98); /* 按下時縮回 */
-    filter: brightness(1.1); /* 稍微變亮 */
-    box-shadow: inset 0 2px 5px rgba(0,0,0,0.8);
+    transform: translateY(2px); /* 按下時位移模擬按壓 */
+    border-bottom-width: 3px; /* 保持邊框寬度避免跳動 */
+    box-shadow: inset 0 2px 5px rgba(0,0,0,0.8), 0 1px 2px rgba(0,0,0,0.5);
+    filter: brightness(0.95); 
 }
 
 #back-btn {
-    background: #3e3b3b;
-    border: 1px solid #c9a063;
-    color: #c9a063;
+    background: #2a2a2a;
+    border: 1px solid #6e5a35;
+    color: #8a7a5a;
     cursor: pointer;
     min-width: 100px;
-    padding: 6px 12px;
+    padding: 8px 16px;
     font-size: 0.85rem;
     margin: 0 auto;
     display: block;
     border-radius: 4px;
-    transition: all 0.2s ease; /* 統一過渡時間 */
+    transition: all 0.2s ease;
+    letter-spacing: 1px;
 }
 
 #back-btn:hover {
-    background: #666;
-    color: #fff;
-    border-color: #888;
-    transform: translateY(-2px); /* 小按鈕僅微幅上移 */
+    background: #333;
+    color: #c9a063;
+    border-color: #c9a063;
+    transform: translateY(-2px);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.5);
 }
 
 #back-btn:active {
     transform: translateY(0);
+    box-shadow: none;
 }
 
 #debug-panel {
@@ -360,11 +392,12 @@ body { background-color: #393939; font-family: "Microsoft JhengHei", sans-serif;
     object-fit: contain;
 }
 .start-title-text {
-    color: #000;
-    font-size: 8cqw;
+    color: #1a1a1a;
+    font-size: 8.5cqw;
     margin-top: -5px;
-    letter-spacing: 4px;
-    font-weight: bold;
+    letter-spacing: 6px;
+    font-weight: 900;
+    text-shadow: 2px 2px 0px rgba(255,255,255,0.4);
 }
 
 /* Result Screen */
@@ -388,15 +421,18 @@ body { background-color: #393939; font-family: "Microsoft JhengHei", sans-serif;
     filter: drop-shadow(0 0 10px rgba(0,0,0,0.5));
 }
 .result-name-text {
-    color: #c9a063;
-    font-size: 7cqw; 
+    color: #ffda6b;
+    font-size: 7.5cqw; 
     margin: 0;   /* 移除所有 margin 以節省空間 */
+    text-shadow: 0 2px 5px rgba(0,0,0,0.8);
+    letter-spacing: 2px;
 }
 .result-desc-text {
-    color: #ddd;
+    color: #e0e0e0;
     font-size: 3.8cqw;
     text-align: justify;
-    line-height: 1.5;
+    line-height: 1.6;
+    letter-spacing: 0.5px;
 }
 
 /* Slide Screen */
@@ -504,21 +540,29 @@ body { background-color: #393939; font-family: "Microsoft JhengHei", sans-serif;
 
 .loading-bar-container {
     width: 100%;
-    height: 6px;
-    background-color: #333;
-    border-radius: 3px;
+    height: 12px; /* Thicker for better visibility */
+    background-color: #0f0f0f; /* Deep black recess */
+    border: 1px solid #444; /* Stone edge */
+    border-radius: 6px;
     overflow: hidden;
     margin-bottom: 15px;
-    box-shadow: inset 0 1px 3px rgba(0,0,0,0.5);
+    box-shadow: inset 0 2px 5px rgba(0,0,0,0.9); /* Inner shadow for depth */
 }
 
 #loading-bar {
     width: 0%;
     height: 100%;
-    background-color: #c9a063; /* Use the theme gold/brown color */
-    border-radius: 3px;
+    background: linear-gradient(90deg, #8a6a30, #f0d090, #8a6a30); /* Gold metallic shine */
+    background-size: 200% 100%;
+    border-radius: 4px;
     transition: width 0.2s ease-out;
-    box-shadow: 0 0 10px rgba(201, 160, 99, 0.5);
+    box-shadow: 0 0 12px rgba(201, 160, 99, 0.6);
+    animation: loadingShine 2s infinite linear;
+}
+
+@keyframes loadingShine {
+    0% { background-position: 100% 0; }
+    100% { background-position: -100% 0; }
 }
 
 #loading-text {
@@ -527,5 +571,5 @@ body { background-color: #393939; font-family: "Microsoft JhengHei", sans-serif;
     letter-spacing: 2px;
     font-weight: bold;
     text-transform: uppercase;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.8);
 }
-

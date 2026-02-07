@@ -661,6 +661,13 @@ function initParticles() {
     particles = [];
     const particleCount = Math.floor((canvas.width * canvas.height) / 15000); // 根據螢幕大小調整數量
     
+    const colors = [
+        '201, 160, 99', // Gold
+        '100, 200, 255', // Cyan Magic
+        '160, 100, 200', // Purple Void
+        '120, 120, 120' // Dungeon Dust
+    ];
+
     for (let i = 0; i < particleCount; i++) {
         particles.push({
             x: Math.random() * canvas.width,
@@ -668,7 +675,8 @@ function initParticles() {
             size: Math.random() * 2 + 0.5,
             speedX: Math.random() * 0.5 - 0.25,
             speedY: Math.random() * 0.5 - 0.25,
-            opacity: Math.random() * 0.5 + 0.1
+            opacity: Math.random() * 0.5 + 0.1,
+            color: colors[Math.floor(Math.random() * colors.length)]
         });
     }
 }
@@ -688,7 +696,7 @@ function animateParticles() {
         
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(201, 160, 99, ${p.opacity})`; // 使用金棕色系
+        ctx.fillStyle = `rgba(${p.color}, ${p.opacity})`; 
         ctx.fill();
     });
     
